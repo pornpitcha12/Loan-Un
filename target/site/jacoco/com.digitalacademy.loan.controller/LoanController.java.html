@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoanController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">loan</a> &gt; <a href="index.source.html" class="el_package">com.digitalacademy.loan.controller</a> &gt; <span class="el_source">LoanController.java</span></div><h1>LoanController.java</h1><pre class="source lang-java linenums">package com.digitalacademy.loan.controller;
+
+import com.digitalacademy.loan.constants.LoanError;
+import com.digitalacademy.loan.constants.Response;
+import com.digitalacademy.loan.exception.LoanException;
+import com.digitalacademy.loan.model.LoanInfoModel;
+import com.digitalacademy.loan.model.ResponseModel;
+import com.digitalacademy.loan.model.StatusModel;
+import com.digitalacademy.loan.service.LoanService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(path = &quot;/loan&quot;)
+public class LoanController {
+<span class="fc" id="L24">    private static final Logger log =</span>
+<span class="fc" id="L25">            LogManager.getLogger(LoanController.class.getName());</span>
+    private LoanService loanService;
+
+    @Autowired
+<span class="fc" id="L29">    public LoanController(LoanService loanService) {this.loanService = loanService;}</span>
+
+    @GetMapping(&quot;/info/{id}&quot;)
+    public HttpEntity&lt;ResponseModel&gt; getLoanInfoById(@PathVariable Long id) throws Exception {
+        try {
+<span class="fc" id="L34">            log.info(&quot;Get loan info by customer id: {}&quot;, id);</span>
+<span class="fc" id="L35">            LoanInfoModel resp = loanService.getLoanInfoById(id);</span>
+<span class="fc" id="L36">            log.info(&quot;Response id: {}, status: {}&quot;, resp.getId(), resp.getStatus());</span>
+
+<span class="fc" id="L38">            StatusModel status = new StatusModel(Response.SUCCESS_CODE.getContent(), Response.SUCCESS.getContent());</span>
+
+<span class="fc" id="L40">            return ResponseEntity.ok(new ResponseModel(status, resp));</span>
+<span class="fc" id="L41">        } catch (LoanException e) {</span>
+<span class="fc" id="L42">            log.error(&quot;Loan exception by id: {}&quot;,id);</span>
+<span class="fc" id="L43">            LoanError loanError = e.getLoanError();</span>
+
+<span class="fc" id="L45">            return ResponseEntity.ok(</span>
+                    new ResponseModel(
+                            new StatusModel(
+<span class="fc" id="L48">                                    loanError.getCode(),</span>
+<span class="fc" id="L49">                                    loanError.getMessage()</span>
+                            )
+                    )
+            );
+<span class="fc" id="L53">        } catch (Exception e) {</span>
+<span class="fc" id="L54">            log.error(&quot;Exception by id: {}&quot;, id);</span>
+<span class="fc" id="L55">            LoanError loanError = LoanError.GET_LOAN_INFO_EXCEPTION;</span>
+<span class="fc" id="L56">            return new ResponseModel(</span>
+                    new StatusModel(
+<span class="fc" id="L58">                            loanError.getCode(),</span>
+<span class="fc" id="L59">                            loanError.getMessage()</span>
+                    )
+<span class="fc" id="L61">            ).build(HttpStatus.INTERNAL_SERVER_ERROR);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.2.201808211720</span></div></body></html>
